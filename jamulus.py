@@ -503,6 +503,7 @@ class JamulusConnector:
         self.log = log
         self.log_data = log_data
         self.log_audio = log_audio
+        self.linecnt = 0
         self.host = host
         self.port = port
         if self.port is not None:
@@ -796,10 +797,6 @@ class JamulusConnector:
         if offset != len(data):
             raise ValueError("invalid message length ({}/{}) {}".format(offset, len(data)))
 
-        # send acknowledgement
-        if ackn:
-            self.send_ack(addr, id, count)
-
         # verify ID is valid
         if id not in MSG_KEYS.keys() or id == 0:
             raise ValueError("invalid message ID ({})".format(id))
@@ -812,7 +809,7 @@ class JamulusConnector:
         # unpack data
         values = self.prot_unpack(format, main_values["data"], repeat=repeat)
 
-        return key, count, values
+        return id, key, count, values
 
     def send_ack(self, addr, id, count):
         """
@@ -857,7 +854,8 @@ class JamulusConnector:
             True for received / False for sent
         """
         if self.log and (key != "AUDIO" or self.log_audio):
-            output = "{} {} #{} {} ({})".format(
+            output = "[{}] {} {} #{} {} ({})".format(
+	        self.linecnt,
                 addr,
                 " >" if recv else "< ",
                 count,
@@ -866,6 +864,7 @@ class JamulusConnector:
             )
             if self.log_data and values is not None and len(values) > 0:
                 output += " {}".format(values)
+            self.linecnt += 1
             print(output)
 
     def sendto(self, addr, key, values=None, count=0):
@@ -883,6 +882,8 @@ class JamulusConnector:
         count : int
             message count
         """
+        print("BEG sendto()")
+
         if key == "AUDIO":
             # pack audio frame
             data = self.pack(FORMAT["AUDIO_FRAME"], values)
@@ -898,6 +899,7 @@ class JamulusConnector:
             self.sock.sendto(data, addr)
         else:
             print("error: no valid data to send")
+        print("END sendto()")
 
     def recvfrom(self, timeout=None, ackn=True, bufsize=MAX_SIZE_BYTES_NETW_BUF):
         """
@@ -923,6 +925,8 @@ class JamulusConnector:
         dict / list(dict)
             data keys and values
         """
+        print("BEG recvfrom()")
+
         # set timeout
         self.sock.settimeout(timeout)
 
@@ -939,8 +943,12 @@ class JamulusConnector:
         try:
             # detect protocol messages
             if len(data) >= 9 and data[:2] == b"\x00\x00":
-                key, count, values = self.main_unpack(data, ackn, addr)
+                id, key, count, values = self.main_unpack(data, ackn, addr)
                 self.log_message(addr, key, count=count, length=len(data), values=values, recv=True)
+
+                # send acknowledgement
+                if ackn:
+                    self.send_ack(addr, id, count)
 
             # assume audio messages
             elif len(data) >= 1:
@@ -950,6 +958,8 @@ class JamulusConnector:
 
         except ValueError as error:
             print("error decoding message from {}: {} - {}".format(addr, error, data))
+
+        print("END recvfrom()")
 
         return (addr, key, count, values)
 
