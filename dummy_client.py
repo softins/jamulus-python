@@ -44,6 +44,8 @@ def main():
     audio_values = jamulus.silent_audio(BASE_NETW_SIZE)
     jc.sendto(args.server, "AUDIO", audio_values)
 
+    scount = 0
+
     while True:
         addr, key, count, values = jc.recvfrom()
 
@@ -55,8 +57,8 @@ def main():
             jc.sendto(addr, "AUDIO", audio_values)
 
         elif key == "REQ_SPLIT_MESS_SUPPORT":
-            jc.sendto(addr, "SPLIT_MESS_SUPPORTED")
-            pass
+            jc.sendto(addr, "SPLIT_MESS_SUPPORTED", count=scount)
+            scount += 1
 
         elif key == "REQ_NETW_TRANSPORT_PROPS":
             jc.sendto(
@@ -71,10 +73,13 @@ def main():
                     "flags": 0,
                     "audiocod_arg": 0,
                 },
+                count=scount
             )
+            scount += 1
 
         elif key == "REQ_JITT_BUF_SIZE":
-            jc.sendto(addr, "JITT_BUF_SIZE", {"blocks": JITT_BUF_SIZE})
+            jc.sendto(addr, "JITT_BUF_SIZE", {"blocks": JITT_BUF_SIZE}, count=scount)
+            scount += 1
 
         elif key == "REQ_CHANNEL_INFOS":
             jc.sendto(
@@ -87,7 +92,9 @@ def main():
                     "name": "Test Client",
                     "city": "",
                 },
+                count=scount
             )
+            scount += 1
 
 
 def signal_handler(sig, frame):
