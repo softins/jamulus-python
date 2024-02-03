@@ -2,6 +2,7 @@
 
 import socket
 import struct
+import zlib
 
 
 DEFAULT_PORT = 22124
@@ -945,6 +946,9 @@ class JamulusConnector:
             if len(data) >= 9 and data[:2] == b"\x00\x00":
                 id, key, count, values = self.main_unpack(data, ackn, addr)
                 self.log_message(addr, key, count=count, length=len(data), values=values, recv=True)
+                for comp in range(-1,10):
+                    temp = zlib.compress(data, comp)
+                    print("Compression = {}, payload size = {}".format(comp, len(temp)))
 
                 # send acknowledgement
                 if ackn:
