@@ -19,6 +19,7 @@ FORMAT = {
     # V = 2 bytes length n + n bytes UTF-8 string
     # v = 2 bytes length n + n bytes data
     # z = all remaining data
+    "HEADER": (("tag", "H"), ("id", "H"), ("count", "B"), ("len", "H")),
     "MAIN_FRAME": (("tag", "H"), ("id", "H"), ("count", "B"), ("data", "v")),
     "AUDIO_FRAME": (("data", "z"),),
     "CRC": (("crc", "H"),),
@@ -499,19 +500,26 @@ OS_KEYS = {0: "Windows", 1: "MacOS", 2: "Linux", 3: "Android", 4: "iOS", 5: "Uni
 
 
 class JamulusConnector:
-    def __init__(self, host="", port=DEFAULT_PORT, log=True, log_data=False, log_audio=True):
+    def __init__(self, host="", port=DEFAULT_PORT, log=True, log_data=False, log_audio=True, tcp=False):
         self.log = log
         self.log_data = log_data
         self.log_audio = log_audio
         self.host = host
         self.port = port
-        if self.port is not None:
+        self.tcp = tcp
+        self.sock = None
+
+        if self.tcp:
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        elif self.port is not None:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            print("listening to port {}".format(self.port))
             self.sock.bind((self.host, self.port))
 
+        self.addr = self.sock.getsockname()
+        print("local port {}".format(self.addr[1]))
+
     def close(self):
-        if self.port is not None:
+        if self.sock is not None:
             print("closing socket")
             self.sock.close()
 
@@ -868,6 +876,12 @@ class JamulusConnector:
                 output += " {}".format(values)
             print(output)
 
+    def connect(self, addr, timeout=None):
+        if self.tcp:
+            # set timeout
+            self.sock.settimeout(timeout)
+            self.sock.connect(addr)
+
     def sendto(self, addr, key, values=None, count=0):
         """
         Encode a Jamulus message and send it to a host
@@ -895,7 +909,10 @@ class JamulusConnector:
 
         # send data
         if data is not None and len(data) <= MAX_SIZE_BYTES_NETW_BUF:
-            self.sock.sendto(data, addr)
+            if self.tcp:
+                self.sock.sendall(data)
+            else:
+                self.sock.sendto(data, addr)
         else:
             print("error: no valid data to send")
 
@@ -928,7 +945,17 @@ class JamulusConnector:
 
         # receive data
         try:
-            data, addr = self.sock.recvfrom(bufsize)
+            if self.tcp:
+                data, addr = self.sock.recv(7), None
+                if len(data) >= 7 and data[:2] == b"\x00\x00":
+                    header, offset = self.unpack(FORMAT["HEADER"], data)
+                    datacnt = header["len"] + 2
+                    while datacnt > 0:
+                        temp = self.sock.recv(datacnt)
+                        data += temp
+                        datacnt -= len(temp)
+            else:
+                data, addr = self.sock.recvfrom(bufsize)
         except socket.timeout:
             raise TimeoutError
 
