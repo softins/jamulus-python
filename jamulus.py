@@ -125,6 +125,7 @@ PROT = {
     "CLM_REQ_CONN_CLIENTS_LIST": {},
     "CLM_CHANNEL_LEVEL_LIST": {"format": FORMAT["CLM_CHANNEL_LEVEL_LIST"]},
     "CLM_REGISTER_SERVER_RESP": {"format": FORMAT["CLM_REGISTER_SERVER_RESP"]},
+    "CLM_TCP_SUPPORTED": {},
 }
 
 MSG_IDS = {
@@ -175,6 +176,7 @@ MSG_IDS = {
     "CLM_REGISTER_SERVER_RESP": 1016,  # status of server registration request
     "CLM_REGISTER_SERVER_EX": 1017,  # register server with extended information
     "CLM_RED_SERVER_LIST": 1018,  # reduced server list
+    "CLM_TCP_SUPPORTED": 1019,  # TCP is supported
 }
 MSG_KEYS = dict(zip(MSG_IDS.values(), MSG_IDS.keys()))
 
