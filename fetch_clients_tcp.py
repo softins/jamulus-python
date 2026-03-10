@@ -103,14 +103,14 @@ def main():
             print("received {} clients".format(len(values)))
             for client in values:
                 print(format_client(client))
-            #break
+            break
 
         elif key == "CLM_SERVER_LIST":
             # server list received
             print("received {} servers".format(len(values)))
             for server in values:
                 print(format_server(server))
-            #break
+            break
 
 
 def signal_handler(sig, frame):
