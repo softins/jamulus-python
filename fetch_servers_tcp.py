@@ -61,7 +61,15 @@ def main():
     jc = jamulus.JamulusConnector(port=args.port, log_data=args.log_data, tcp=True)
 
     for addr in args.directory:
-        jc.connect(addr, timeout=2)
+        try:
+            jc.connect(addr, timeout=1)
+        except ConnectionRefusedError:
+            print("Connection refused")
+            sys.exit(1)
+        except TimeoutError:
+            print("Connection timed out")
+            sys.exit(1)
+
         jc.sendto(addr, "CLM_REQ_SERVER_LIST")
 
     # receive messages indefinitely
