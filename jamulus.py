@@ -882,7 +882,10 @@ class JamulusConnector:
         if self.tcp:
             # set timeout
             self.sock.settimeout(timeout)
-            self.sock.connect(addr)
+            try:
+                self.sock.connect(addr)
+            except socket.timeout:
+                raise TimeoutError from None
 
     def sendto(self, addr, key, values=None, count=0):
         """
