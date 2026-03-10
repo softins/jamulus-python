@@ -952,6 +952,9 @@ class JamulusConnector:
         try:
             if self.tcp:
                 data, addr = self.sock.recv(7), None
+                if len(data) == 0:
+                    raise EOFError
+
                 if len(data) >= 7 and data[:2] == b"\x00\x00":
                     header, offset = self.unpack(FORMAT["HEADER"], data)
                     datacnt = header["len"] + 2
