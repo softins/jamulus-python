@@ -77,7 +77,11 @@ def main():
 
         try:
             addr, key, count, values = jc.recvfrom(timeout)
+            #print(f"addr={addr} key={key} count={count} values={values}")
         except TimeoutError:
+            break
+            #continue
+        except EOFError:
             break
             #continue
 
