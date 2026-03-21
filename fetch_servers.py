@@ -27,6 +27,15 @@ def format_server(server):
         server.get("internal_address", ""),
     )
 
+def format_red_server(server):
+    age_seconds = int(time() - server["time_updated"]) if "time_updated" in server.keys() else "?"
+    return "{:>15}:{:<5} {:<20} {}s".format(
+        server.get("ip", 0),
+        server.get("port", 0),
+        server.get("name", "?"),
+        age_seconds,
+    )
+
 def argument_parser():
     parser = argparse.ArgumentParser()
     # use default port 0 for a client
@@ -81,6 +90,13 @@ def main():
             print("received {} servers".format(len(values)))
             for server in values:
                 print(format_server(server))
+            #break
+
+        elif key == "CLM_RED_SERVER_LIST":
+            # server list received
+            print("received {} servers".format(len(values)))
+            for server in values:
+                print(format_red_server(server))
             #break
 
 
