@@ -75,6 +75,7 @@ FORMAT = {
     "CLM_CHANNEL_LEVEL_LIST": (("levels", "z"),),
     "CLM_REGISTER_SERVER_RESP": (("status", "B"),),
     "CLM_RED_SERVER_LIST": (("ip", "A"), ("port", "H"), ("name", "U")),
+    "TCPID": (("id", "H"),),
     "CLM_CLIENT_ID": (("id", "B"),),
 }
 
@@ -126,7 +127,7 @@ PROT = {
     "CLM_REQ_CONN_CLIENTS_LIST": {},
     "CLM_CHANNEL_LEVEL_LIST": {"format": FORMAT["CLM_CHANNEL_LEVEL_LIST"]},
     "CLM_REGISTER_SERVER_RESP": {"format": FORMAT["CLM_REGISTER_SERVER_RESP"]},
-    "CLM_TCP_SUPPORTED": {},
+    "CLM_TCP_SUPPORTED": {"format": FORMAT["TCPID"]},
     "CLM_CLIENT_ID": {"format": FORMAT["CLM_CLIENT_ID"]},
 }
 
