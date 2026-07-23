@@ -75,6 +75,8 @@ FORMAT = {
     "CLM_CHANNEL_LEVEL_LIST": (("levels", "z"),),
     "CLM_REGISTER_SERVER_RESP": (("status", "B"),),
     "CLM_RED_SERVER_LIST": (("ip", "A"), ("port", "H"), ("name", "U")),
+    "CLM_SERVER_FEATURES": (("features", "L"),),
+    "CLM_WELCOME_MESSAGE": (("string", "V"),),
     "TCPID": (("id", "H"),),
     "CLM_CLIENT_ID": (("id", "B"),),
 }
@@ -127,6 +129,10 @@ PROT = {
     "CLM_REQ_CONN_CLIENTS_LIST": {},
     "CLM_CHANNEL_LEVEL_LIST": {"format": FORMAT["CLM_CHANNEL_LEVEL_LIST"]},
     "CLM_REGISTER_SERVER_RESP": {"format": FORMAT["CLM_REGISTER_SERVER_RESP"]},
+    "CLM_SERVER_FEATURES": {"format": FORMAT["CLM_SERVER_FEATURES"]},
+    "CLM_REQ_SERVER_FEATURES": {},
+    "CLM_WELCOME_MESSAGE": {"format": FORMAT["CLM_WELCOME_MESSAGE"]},
+    "CLM_REQ_WELCOME_MESSAGE": {},
     "CLM_TCP_SUPPORTED": {"format": FORMAT["TCPID"]},
     "CLM_CLIENT_ID": {"format": FORMAT["CLM_CLIENT_ID"]},
 }
@@ -179,8 +185,12 @@ MSG_IDS = {
     "CLM_REGISTER_SERVER_RESP": 1016,  # status of server registration request
     "CLM_REGISTER_SERVER_EX": 1017,  # register server with extended information
     "CLM_RED_SERVER_LIST": 1018,  # reduced server list
-    "CLM_TCP_SUPPORTED": 1019,  # TCP is supported
-    "CLM_CLIENT_ID": 1020,  # Client ID for connection linking
+    "CLM_SERVER_FEATURES": 1019, # server features message
+    "CLM_REQ_SERVER_FEATURES": 1020, # request server features
+    "CLM_WELCOME_MESSAGE": 1021, # server welcome message
+    "CLM_REQ_WELCOME_MESSAGE": 1022, # request server welcome message
+    "CLM_TCP_SUPPORTED": 1023,  # TCP is supported
+    "CLM_CLIENT_ID": 1024,  # Client ID for connection linking
 }
 MSG_KEYS = dict(zip(MSG_IDS.values(), MSG_IDS.keys()))
 
